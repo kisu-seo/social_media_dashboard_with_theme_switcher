@@ -1,87 +1,566 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media Dashboard</title>
 
-  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
-  
-  <title>Frontend Mentor | [Challenge Name Here]</title>
+  <!-- 구글 폰트: Inter 불러오기 (400=기본체, 700=굵게) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <!-- Tailwind CSS CDN: npm 설치 없이 <script> 한 줄로 사용 가능한 CSS 라이브러리 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!--
+    Tailwind 커스텀 디자인 시스템 설정
+    비유: 기본 레고 세트에 우리 프로젝트만의 특별한 색상·크기 블록을 추가하는 것.
+          이제 bg-navy-900, text-green-positive 같은 클래스명을 사용할 수 있음.
+  -->
+  <script>
+    tailwind.config = {
+      // 다크모드 작동 방식: 'class' = html 태그에 'dark' 클래스가 붙으면 dark: 스타일 전체 활성화
+      darkMode: 'class',
+
+      theme: {
+        extend: {
+          // ─── 폰트 패밀리 ───
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'], // 모든 텍스트의 기본 폰트를 Inter로 지정
+          },
+
+          // ─── 커스텀 색상 팔레트 (style-guide.md 기반) ───
+          colors: {
+            // 회색 계열
+            'gray-950': '#151921',  // 라이트 테마: 가장 진한 텍스트
+            'gray-650': '#404359',  // 중간 톤의 진한 회색 (추가)
+            'gray-900': '#1D1F29',  // 다크 테마: 전체 배경
+            'gray-800': '#1F212E',  // 다크 테마: 헤더 배경
+            'gray-500': '#63687D',  // 라이트 테마: 보조 텍스트
+            'gray-400': '#8B97C6',  // 다크 테마: 보조 텍스트
+            'gray-100': '#AEB3CB',  // 라이트 테마: 토글 배경색
+            'gray-50': '#F5F7FF',  // 라이트 테마: 헤더 배경
+
+            // 네이비 계열
+            'navy-900': '#252A41',  // 다크 테마: 카드 배경
+            'navy-800': '#333A56',  // 다크 테마: 카드 호버 배경
+            'navy-50': '#F0F2FA',  // 라이트 테마: 카드 배경
+
+            // 브랜드 & 기능성 색상
+            'blue-facebook': '#198FF5', // 페이스북 브랜드 컬러
+            'blue-twitter': '#1CA0F2', // 트위터 브랜드 컬러
+            'blue-hover': '#E1E3F0', // 라이트 테마 카드 호버
+            'red-youtube': '#C4032A', // 유튜브 브랜드 컬러
+            'red-negative': '#DC414C', // 감소 수치 표시 (빨강)
+            'green-positive': '#1EB589', // 증가 수치 표시 (초록)
+          },
+
+          // ─── 커스텀 간격 시스템 (style-guide.md 기반) ───
+          // p-spacing-300, gap-spacing-200 처럼 사용
+          spacing: {
+            'spacing-100': '8px',
+            'spacing-200': '16px',
+            'spacing-300': '24px',
+            'spacing-400': '32px',
+            'spacing-500': '40px',
+            'spacing-600': '48px',
+            'spacing-800': '64px',
+          },
+
+          // ─── 커스텀 폰트 크기 프리셋 (style-guide.md 기반) ───
+          // [글자크기, { 줄간격, 자간 }] 형태로 세트를 묶어서 text-preset-1 처럼 사용
+          fontSize: {
+            'preset-1': ['56px', { lineHeight: '0.85', letterSpacing: '-2px' }], // 대형 숫자
+            'preset-2': ['32px', { lineHeight: '1.25', letterSpacing: '0px' }], // 중형 숫자
+            'preset-3': ['28px', { lineHeight: '1.25', letterSpacing: '0px' }], // 섹션 제목
+            'preset-4': ['24px', { lineHeight: '1.20', letterSpacing: '0px' }], // 대시보드 제목 (모바일용)
+            'preset-5': ['14px', { lineHeight: '1.25', letterSpacing: '0px' }], // 보조 텍스트 (14px)
+            'preset-6-bold': ['12px', { lineHeight: '1.25', letterSpacing: '0px' }], // 작은 굵은 텍스트
+            'preset-6': ['12px', { lineHeight: '1.25', letterSpacing: '5px' }], // 레이블 (자간 넓음)
+          },
+        }
+      },
+    }
+  </script>
+
   <style>
-    .attribution { font-size: 11px; text-align: center; }
-    .attribution a { color: hsl(228, 45%, 44%); }
+    /*
+      ===== 토글 스위치 커스텀 스타일 =====
+      Tailwind 유틸리티 클래스만으로 둥근 슬라이딩 토글을 만들기 어려우므로
+      여기서 직접 '트랙(배경 타원)'과 '썸(움직이는 동그라미)'을 CSS로 그림.
+    */
+    .toggle-track {
+      display: flex;
+      align-items: center;
+      width: 50px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: #AEB3CB;
+      /* 라이트 모드: 회색 */
+      cursor: pointer;
+      padding: 3px;
+      border: none;
+      outline: none;
+      flex-shrink: 0;
+      transition: background 0.3s ease;
+    }
+
+    /* 다크 모드일 때: 토글 배경 그라데이션 (64도 각도 및 새로운 브랜드 컬러 적용) */
+    .dark .toggle-track {
+      background: linear-gradient(
+        64deg,
+        #388FE7,  /* 파란색 끝 */
+        #40DB82   /* 초록색 끝 */
+      );
+    }
+
+    /* 토글 안의 동그란 버튼 */
+    .toggle-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: #F5F7FF;
+      /* 라이트: 연한색 */
+      flex-shrink: 0;
+      transform: translateX(26px); /* 기본 상태(라이트 모드)를 오른쪽으로 설정 */
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* 다크 모드일 때: 동그란 버튼이 왼쪽으로 슬라이드 (0 위치로 이동) */
+    .dark .toggle-thumb {
+      transform: translateX(0);
+      background-color: #1F212E;
+      /* 다크: 진한색 */
+    }
+
+    /*
+      ===== 인스타그램 카드 상단 그라디언트 테두리 =====
+      비유: HTML에 태그를 추가하지 않고, CSS가 카드 위에 얇은 무지개 종이를
+            '유령처럼' 붙여주는 기법 (::before 가상 요소).
+    */
+    .instagram-border::before {
+      content: '';
+      /* 내용은 없어도 이 줄이 있어야 요소가 생성됨 */
+      display: block;
+      height: 4px;
+      background: linear-gradient(to right,
+          hsl(37, 97%, 70%),
+          /* 주황색 */
+          hsl(5, 77%, 71%),
+          /* 분홍색 */
+          hsl(329, 70%, 58%)
+          /* 보라-핑크 */
+        );
+    }
   </style>
 </head>
-<body>
 
-  Social Media Dashboard
-  Total Followers: 23,004
+<!--
+  <body> 전체 페이지 배경
+  - 라이트: 흰색(#FFFFFF)
+  - 다크: 매우 진한 남색(gray-900 = #1D1F29)
+  - transition: 테마 전환 시 색상이 부드럽게 변함 (0.3초)
+-->
 
-  Dark Mode
+<body class="bg-white dark:bg-gray-900 font-sans min-h-screen transition-colors duration-300">
 
-  
+  <!-- =====================================================
+       HEADER: 대시보드 제목 + 다크 모드 토글
+       건물의 지붕처럼 페이지 상단을 감싸는 역할.
+       아래쪽 모서리만 둥글게(rounded-b-[35px]) 처리해 곡선 형태.
+  ===================================================== -->
+  <header class="bg-blue-50 dark:bg-gray-900 rounded-b-[20px] transition-colors duration-300">
+    <div class="max-w-[1110px] mx-auto px-spacing-300 md:px-0 pt-[36px] md:pt-spacing-500 pb-[82px]">
+      <!-- pt-[36px]: 모바일에서 상단 패딩 36px, md:pt-spacing-500: 데스크탑(768px 이상)에서 기존 40px 유지 -->
 
-  @nathanf
-  1987
-  Followers
-  12 Today
+      <!--
+        헤더 내부 레이아웃:
+        - 모바일(기본): 세로로 쌓임 (flex-col)
+        - 데스크탑(md 이상): 양 끝에 배치 (flex-row + justify-between)
+      -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-spacing-300">
 
-  @nathanf
-  1044
-  Followers
-  99 Today
+        <!-- 왼쪽: 제목 + 총 팔로워 수 -->
+        <div>
+          <h1 class="text-preset-4 md:text-preset-3 font-bold text-gray-950 dark:text-white transition-colors duration-300">
+            Social Media Dashboard
+          </h1>
+          <p class="text-preset-5 font-bold text-gray-650 dark:text-gray-400 mt-0 transition-colors duration-300">
+            Total Followers: 23,004
+          </p>
+        </div>
 
-  @realnathanf
-  11k
-  Followers
-  1099 Today
+        <!-- 구분선: 모바일에서만 표시, 데스크탑(md 이상)에서는 숨김 -->
+        <hr class="md:hidden border-gray-500 opacity-20">
 
-  Nathan F.
-  8239
-  Subscribers
-  144 Today
+        <!-- 오른쪽: "Dark Mode" 레이블 + 토글 스위치 -->
+        <div class="flex items-center justify-between md:justify-end gap-spacing-200">
+
+          <!--
+            <label>: 클릭하면 연결된 버튼(id="darkModeToggle")이 클릭된 것처럼 동작
+            for 속성의 값 = 연결할 버튼의 id 값
+          -->
+          <label for="darkModeToggle"
+            class="text-preset-5 font-bold text-gray-650 dark:text-gray-400 cursor-pointer select-none transition-colors duration-300">
+            Dark Mode
+          </label>
+
+          <!--
+            토글 버튼 (접근성 속성 설명):
+            - role="switch": "이건 켜고/끄는 스위치예요"를 스크린 리더에 알림
+            - aria-checked: 현재 상태. "false"=꺼짐, "true"=켜짐
+            - aria-label: 스크린 리더가 읽어줄 버튼 설명
+          -->
+          <button id="darkModeToggle" role="switch" aria-checked="false" aria-label="다크 모드 전환" class="toggle-track"
+            onclick="toggleDarkMode()">
+            <span class="toggle-thumb" aria-hidden="true"></span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
 
 
+  <!-- =====================================================
+       MAIN: 모든 카드 컨텐츠를 담는 메인 영역
+  ===================================================== -->
+  <main class="max-w-[1110px] mx-auto px-spacing-300 md:px-0 py-spacing-500">
 
-  Overview - Today
+    <!-- ==================================================
+         SECTION 1: 소셜 미디어 팔로워 메인 카드 (4개)
+         비유: 가게 쇼윈도에 4개 상품을 나란히 전시하는 것.
+               - 모바일: 1열로 쌓임
+               - 데스크탑: 4열로 나란히
+    ================================================== -->
+    <section aria-label="소셜 미디어 팔로워 현황">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-spacing-300">
 
-  Page Views
-  87
-  3%
+        <!-- ─── 팔로워 카드 1: 페이스북 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg overflow-hidden cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="페이스북 팔로워 현황">
+          <!-- 상단 4px 파란 테두리 (페이스북 브랜드 컬러) -->
+          <div class="h-1 bg-blue-facebook" aria-hidden="true"></div>
 
-  Likes
-  52
-  2%
+          <!-- 카드 본문: 모든 내용을 가운데 정렬 -->
+          <div
+            class="flex flex-col items-center text-center px-spacing-400 pt-spacing-400 pb-spacing-400 gap-spacing-300">
 
-  Likes
-  5462
-  2257%
+            <!-- 플랫폼 아이콘 + 계정 핸들명 -->
+            <div class="flex items-center gap-spacing-100">
+              <!-- aria-hidden="true": 아이콘은 장식용이므로 스크린 리더가 건너뜀 -->
+              <img src="images/icon-facebook.svg" alt="" aria-hidden="true" class="w-5 h-5">
+              <span
+                class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                @nathanf
+              </span>
+            </div>
 
-  Profile Views
-  52k
-  1375%
+            <!-- 팔로워 수 + 레이블 -->
+            <div>
+              <!-- text-preset-1: 56px 굵은 글씨 (가장 큰 숫자) -->
+              <p class="text-preset-1 font-bold text-black dark:text-white transition-colors duration-300">
+                1987
+              </p>
+              <!-- text-preset-6: 12px, 자간 5px, 대문자 (FOLLOWERS 레이블) -->
+              <p
+                class="text-preset-6 font-normal uppercase text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+                Followers
+              </p>
+            </div>
 
-  Retweets
-  117
-  303%
+            <!-- 오늘 증감 수치: 위 화살표 + 초록 숫자 = 증가 -->
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">12 Today</span>
+            </div>
+          </div>
+        </article>
 
-  Likes
-  507
-  553%
+        <!-- ─── 팔로워 카드 2: 트위터 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg overflow-hidden cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="트위터 팔로워 현황">
+          <!-- 상단 하늘색 테두리 (트위터 브랜드 컬러) -->
+          <div class="h-1 bg-blue-twitter" aria-hidden="true"></div>
 
-  Likes
-  107
-  19%
+          <div
+            class="flex flex-col items-center text-center px-spacing-400 pt-spacing-400 pb-spacing-400 gap-spacing-300">
+            <div class="flex items-center gap-spacing-100">
+              <img src="images/icon-twitter.svg" alt="" aria-hidden="true" class="w-5 h-5">
+              <span
+                class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                @nathanf
+              </span>
+            </div>
+            <div>
+              <p class="text-preset-1 font-bold text-black dark:text-white transition-colors duration-300">
+                1044
+              </p>
+              <p
+                class="text-preset-6 font-normal uppercase text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+                Followers
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">99 Today</span>
+            </div>
+          </div>
+        </article>
 
-  Total Views
-  1407
-  12%
-  
-  <div class="attribution">
-    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
-    Coded by <a href="#">Your Name Here</a>.
-  </div>
+        <!-- ─── 팔로워 카드 3: 인스타그램 ─── -->
+        <!--
+          instagram-border 클래스:
+          ::before 가상 요소로 CSS가 자동으로 그라디언트 상단 테두리를 그림.
+          overflow-hidden을 유지해도 ::before는 카드 '안'에 있어 정상 표시됨.
+        -->
+        <article class="instagram-border bg-navy-50 dark:bg-navy-900 rounded-lg overflow-hidden cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="인스타그램 팔로워 현황">
+          <!-- 인스타그램은 instagram-border::before 가상요소가 그라디언트 선을 담당 -->
+          <div
+            class="flex flex-col items-center text-center px-spacing-400 pt-spacing-400 pb-spacing-400 gap-spacing-300">
+            <div class="flex items-center gap-spacing-100">
+              <img src="images/icon-instagram.svg" alt="" aria-hidden="true" class="w-5 h-5">
+              <span
+                class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                @realnathanf
+              </span>
+            </div>
+            <div>
+              <p class="text-preset-1 font-bold text-black dark:text-white transition-colors duration-300">
+                11k
+              </p>
+              <p
+                class="text-preset-6 font-normal uppercase text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+                Followers
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">1099 Today</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 팔로워 카드 4: 유튜브 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg overflow-hidden cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="유튜브 구독자 현황">
+          <!-- 상단 빨간 테두리 (유튜브 브랜드 컬러) -->
+          <div class="h-1 bg-red-youtube" aria-hidden="true"></div>
+
+          <div
+            class="flex flex-col items-center text-center px-spacing-400 pt-spacing-400 pb-spacing-400 gap-spacing-300">
+            <div class="flex items-center gap-spacing-100">
+              <img src="images/icon-youtube.svg" alt="" aria-hidden="true" class="w-5 h-5">
+              <span
+                class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                Nathan F.
+              </span>
+            </div>
+            <div>
+              <p class="text-preset-1 font-bold text-black dark:text-white transition-colors duration-300">
+                8239
+              </p>
+              <p
+                class="text-preset-6 font-normal uppercase text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+                Subscribers
+              </p>
+            </div>
+            <!-- 아래 화살표 + 빨간 숫자 = 감소 -->
+            <div class="flex items-center gap-1">
+              <img src="images/icon-down.svg" alt="감소" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-red-negative">144 Today</span>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+
+    <!-- ==================================================
+         SECTION 2: 오늘의 개요 카드 (8개)
+         각 카드: 지표명(좌상) + 플랫폼 아이콘(우상)
+                  수치(좌하) + 증감률(우하)
+    ================================================== -->
+    <section aria-label="오늘의 소셜 미디어 지표 개요" class="mt-spacing-600">
+
+      <!-- 섹션 제목 -->
+      <h2 class="text-preset-3 font-bold text-gray-500 dark:text-white mb-spacing-300 transition-colors duration-300">
+        Overview - Today
+      </h2>
+
+      <!--
+        그리드 레이아웃:
+        - 모바일: 1열
+        - 태블릿(sm): 2열
+        - 데스크탑(md): 4열
+      -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-spacing-300">
+
+        <!-- ─── 개요 카드 1: 페이스북 페이지 뷰 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="페이스북 페이지 뷰">
+          <!-- 상단 행: 지표명(왼쪽) + 플랫폼 아이콘(오른쪽) -->
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Page Views
+            </span>
+            <img src="images/icon-facebook.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <!-- 하단 행: 수치(왼쪽) + 증감률(오른쪽) -->
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">87</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">3%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 2: 페이스북 좋아요 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="페이스북 좋아요">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Likes
+            </span>
+            <img src="images/icon-facebook.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">52</span>
+            <!-- 아래 화살표 + 빨간색 = 감소 -->
+            <div class="flex items-center gap-1">
+              <img src="images/icon-down.svg" alt="감소" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-red-negative">2%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 3: 인스타그램 좋아요 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="인스타그램 좋아요">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Likes
+            </span>
+            <img src="images/icon-instagram.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">5462</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">2257%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 4: 인스타그램 프로필 조회수 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="인스타그램 프로필 조회수">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Profile Views
+            </span>
+            <img src="images/icon-instagram.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">52k</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">1375%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 5: 트위터 리트윗 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="트위터 리트윗">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Retweets
+            </span>
+            <img src="images/icon-twitter.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">117</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">303%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 6: 트위터 좋아요 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="트위터 좋아요">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Likes
+            </span>
+            <img src="images/icon-twitter.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">507</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-up.svg" alt="증가" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-green-positive">553%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 7: 유튜브 좋아요 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="유튜브 좋아요">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Likes
+            </span>
+            <img src="images/icon-youtube.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">107</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-down.svg" alt="감소" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-red-negative">19%</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ─── 개요 카드 8: 유튜브 총 조회수 ─── -->
+        <article class="bg-navy-50 dark:bg-navy-900 rounded-lg p-spacing-300 cursor-pointer
+                 hover:bg-blue-hover dark:hover:bg-navy-800 transition-colors duration-300" aria-label="유튜브 총 조회수">
+          <div class="flex justify-between items-center mb-spacing-400">
+            <span class="text-preset-6-bold font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300">
+              Total Views
+            </span>
+            <img src="images/icon-youtube.svg" alt="" aria-hidden="true" class="w-5 h-5">
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-preset-2 font-bold text-black dark:text-white transition-colors duration-300">1407</span>
+            <div class="flex items-center gap-1">
+              <img src="images/icon-down.svg" alt="감소" class="w-3 h-3">
+              <span class="text-preset-6-bold font-bold text-red-negative">12%</span>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       JavaScript: 외부 파일(script.js)로 분리
+       비유: TV 본체(index.html)와 리모컨(script.js)을 별도로 만든 것.
+             <script src="...">로 연결하면 리모컨이 TV를 제어할 수 있음.
+       defer 속성: HTML을 다 읽은 뒤에 JS를 실행하도록 보장 (오류 방지)
+  ===================================================== -->
+  <script src="script.js" defer></script>
+
 </body>
+
 </html>
