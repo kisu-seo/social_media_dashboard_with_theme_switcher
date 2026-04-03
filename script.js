@@ -12,14 +12,23 @@
   const savedTheme = localStorage.getItem('theme'); // 이전에 저장한 테마 읽기
   const toggleBtn = document.getElementById('darkModeToggle');
 
-  if (savedTheme === 'dark') {
-    // html 최상위 태그에 'dark' 클래스 추가
-    // → Tailwind의 dark: 접두사 스타일이 전부 한꺼번에 활성화됨
-    document.documentElement.classList.add('dark');
+  // ─── 기본값(Default)이 다크 모드로 바뀐 핵심 로직 ───
+  // 비유: 집에 처음 이사 오면 무조건 조명이 켜진(dark) 상태.
+  //       사용자가 명시적으로 'light'를 선택했을 때만 조명을 끔.
+  //
+  // 변경 전 로직: savedTheme === 'dark' 이면 dark 클래스를 추가
+  // 변경 후 로직: savedTheme === 'light' 이면 dark 클래스를 제거
+  //              (그 외의 경우 = 최초 방문 null 포함 → HTML에 이미 class="dark"가 있으므로 그냥 둠)
+  if (savedTheme === 'light') {
+    // html 최상위 태그에서 'dark' 클래스 제거
+    // → Tailwind의 dark: 스타일이 전부 비활성화되어 라이트 모드로 전환됨
+    document.documentElement.classList.remove('dark');
 
-    // 접근성: 스크린 리더에게 "토글이 켜진 상태"임을 알림
-    toggleBtn.setAttribute('aria-checked', 'true');
+    // 접근성: 스크린 리더에게 "토글이 꺼진 상태(라이트 모드)"임을 알림
+    toggleBtn.setAttribute('aria-checked', 'false');
   }
+  // savedTheme === 'dark' 이거나 null(최초 방문)이면 아무것도 안 함
+  // → HTML에 이미 class="dark"가 있으므로 다크 모드가 그대로 유지됨
 })();
 
 // ─── 토글 버튼 클릭 시 호출되는 함수 ───
