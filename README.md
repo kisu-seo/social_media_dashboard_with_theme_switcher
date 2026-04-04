@@ -1,104 +1,60 @@
-# Frontend Mentor - Social media dashboard with theme switcher
+# Social Media Dashboard with Theme Switcher
 
-![Design preview for the Social media dashboard with theme switcher coding challenge](preview.jpg)
+## Table of contents
 
-## Welcome! 👋
+- [Overview](#overview)
+  - [Screenshot](#screenshot)
+  - [Links](#links)
+- [My process](#my-process)
+  - [Built with](#built-with)
+- [Author](#author)
 
-Thanks for checking out this front-end coding challenge.
+## Overview
 
-[Frontend Mentor](https://www.frontendmentor.io) challenges help you improve your coding skills by building realistic projects.
+### Screenshot
 
-**To do this challenge, you need a basic understanding of HTML, CSS and a tiny bit of JavaScript.**
+![Project Screenshot](./social_media_dashboard_with_theme_switcher_1.png)
+![Project Screenshot](./social_media_dashboard_with_theme_switcher_2.png)
 
-## The challenge
+### Links
 
-Your challenge is to build out this Social Media Dashboard and get it looking as close to the design as possible.
+- Solution URL: [Solution URL](https://github.com/kisu-seo/social_media_dashboard_with_theme_switcher)
+- Live Site URL: [Live URL](https://kisu-seo.github.io/social_media_dashboard_with_theme_switcher/)
 
-You can use any tools you like to help you complete the challenge. So if you've got something you'd like to practice, feel free to give it a go.
+## My process
 
-Your users should be able to:
+### Built with
 
-- View the optimal layout for the site depending on their device's screen size
-- See hover states for all interactive elements on the page
-- Toggle color theme to their preference
+- **Semantic HTML5 Markup** — Structured with purpose-built tags (`<header>`, `<main>`, `<section>`, `<article>`) to create a meaningful document outline that supports both SEO and screen reader navigation. Avoided generic `<div>` wrappers where semantic alternatives exist.
 
-Want some support on the challenge? [Join our community](https://www.frontendmentor.io/community) and ask questions in the **#help** channel.
+- **Web Accessibility (A11y)**
+  - Dark mode toggle built with a `<button>` element and `role="switch"`, so screen readers correctly announce it as an on/off switch rather than a generic button.
+  - `aria-checked` dynamically updated in JavaScript to stay in sync with the toggle's visual state on every click.
+  - `aria-hidden="true"` applied to all decorative platform icon images (Facebook, Twitter, Instagram, YouTube) to prevent redundant announcements by screen readers.
+  - `<label for="darkModeToggle">` connected to the toggle button so the "Dark Mode" text label is a clickable tap target on mobile.
+  - `<section aria-label="...">` on both card groups to give screen reader users a clear landmark for each content area.
 
-## Where to find everything
+- **Tailwind CSS (CDN + Custom Design Token System)**
+  - All brand values are centralized inside `tailwind.config` (injected via a `<script>` tag), defining a complete set of **custom color tokens** (`gray-950`, `navy-900`, `navy-50`, `blue-facebook`, `blue-twitter`, `red-youtube`, `green-positive`, `red-negative`, etc.), **typography presets** (`preset-1`–`preset-6` with size, line-height, and letter-spacing), and **spacing tokens** (`spacing-100` through `spacing-800`).
+  - **Mobile-First Responsive Design**: Base styles target mobile (375px); `md:` (768px+) and `lg:` (1024px+) breakpoints progressively enhance the layout — from stacked single-column to a 4-column grid (`lg:grid-cols-4`) — matching all three breakpoints specified in the style guide.
+  - **Dark Mode via Class Strategy**: `darkMode: 'class'` is set in `tailwind.config`, meaning all `dark:` variants activate only when the `<html>` element carries the `dark` class. This gives JavaScript full, explicit control over the theme state.
+  - **Scoped Hover States**: Card hover effects are prefixed with `lg:hover:` so they only fire on pointer devices (desktop), preventing unintended highlight flashes on touch screens.
+  - **`transition-colors duration-300`**: Applied globally to backgrounds and text colors so every light ↔ dark theme switch animates smoothly rather than snapping.
 
-Your task is to build out the project to the designs inside the `/design` folder. You will find both a mobile and a desktop version of the design.
+- **CSS (Custom Component Styles)**
+  - **Toggle Switch**: `.toggle-track` and `.toggle-thumb` are handcrafted in plain CSS because a sliding pill-shaped toggle with an animated thumb cannot be replicated with Tailwind utility classes alone. The thumb position is controlled by `transform: translateX()` and animated with `transition`.
+  - **Instagram Gradient Border**: The three-color gradient top border on the Instagram card is drawn by a `.instagram-border::before` CSS pseudo-element — a technique that adds a decorative element without touching the HTML markup.
+  - **Dark Mode Toggle Gradient**: When `dark` class is present, `.toggle-track` receives a `linear-gradient(64deg, #388FE7, #40DB82)` background matching the Gradient 2 spec in the style guide.
 
-The designs are in JPG static format. Using JPGs will mean that you'll need to use your best judgment for styles such as `font-size`, `padding` and `margin`.
+- **Vanilla JavaScript (ES6+ / Data-Driven Rendering)**
+  - **DRY Architecture**: All 12 cards (4 main + 8 overview) are defined as plain data objects in two arrays (`mainCardsData`, `overviewCardsData`). A single `renderCards()` engine function reads any array and writes the DOM — adding a new card requires only a new data entry, not any HTML edit.
+  - **IIFE for Theme Initialization**: An Immediately Invoked Function Expression runs at parse time to read `localStorage` and restore the saved theme before the first paint, preventing a flash of the wrong theme on page load.
+  - **`classList.toggle()` Dark Mode Switch**: One call toggles the `dark` class on `<html>` and returns the new boolean state, which is then used to sync `aria-checked` and persist the preference to `localStorage` — three side effects from a single expression.
+  - **`Array.prototype.reduce` for Single Reflow**: Instead of appending to `innerHTML` inside a `forEach` loop (which triggers a browser reflow on every iteration), `reduce` concatenates all card HTML strings into one and assigns them to `innerHTML` exactly once — minimizing layout recalculation.
+  - **`<script defer>` for Safe DOM Access**: The `defer` attribute on the script tag guarantees that the full HTML is parsed before any JavaScript runs, so `document.getElementById()` calls always find their targets without needing a `DOMContentLoaded` wrapper.
+  - **JSDoc Documentation**: All functions and data arrays are annotated with `@typedef`, `@property`, `@param`, and `@returns` tags, turning the data-layer types into self-documenting contracts that editors can use for autocompletion and type checking.
 
-If you would like the Figma design file to inspect the design in more detail, you can [subscribe as a PRO member](https://www.frontendmentor.io/pro).
+## Author
 
-You will find all the required assets in the `/images` folder. The assets are already optimized.
-
-There is also a `style-guide.md` file containing the information you'll need, such as color palette and fonts.
-
-## Using AI coding assistants
-
-We've included two files to help you if you're using AI coding assistants (like Claude, GitHub Copilot, Cursor, etc.) while working on this challenge:
-
-- `AGENTS.md` - Contains detailed instructions for AI assistants on how to help you with this challenge. It's tailored to this challenge's difficulty level, so the AI will provide guidance appropriate to your learning stage—offering more support for beginner challenges and encouraging more independence on advanced ones.
-- `CLAUDE.md` - A pointer file that directs Claude-based tools to the AGENTS.md instructions.
-
-**How to use them:** You don't need to do anything! These files are automatically detected by most AI coding tools. The AI will read them and adjust its behavior to be a better learning partner—guiding you toward solutions rather than just giving you the answers.
-
-**Note:** These files are designed to help you *learn*, not to do the work for you. The AI is instructed to ask questions, give hints, and explain concepts rather than writing complete solutions.
-
-## Building your project
-
-Feel free to use any workflow that you feel comfortable with. Below is a suggested process, but do not feel like you need to follow these steps:
-
-1. Initialize your project as a public repository on [GitHub](https://github.com/). Creating a repo will make it easier to share your code with the community if you need help. If you're not sure how to do this, [have a read-through of this Try Git resource](https://try.github.io/).
-2. Configure your repository to publish your code to a web address. This will also be useful if you need some help during a challenge as you can share the URL for your project with your repo URL. There are a number of ways to do this, and we provide some recommendations below.
-3. Look through the designs to start planning out how you'll tackle the project. This step is crucial to help you think ahead for CSS classes to create reusable styles.
-4. Before adding any styles, structure your content with HTML. Writing your HTML first can help focus your attention on creating well-structured content.
-5. Write out the base styles for your project, including general content styles, such as `font-family` and `font-size`.
-6. Start adding styles to the top of the page and work down. Only move on to the next section once you're happy you've completed the area you're working on.
-
-## Deploying your project
-
-As mentioned above, there are many ways to host your project for free. Our recommended hosts are:
-
-- [GitHub Pages](https://pages.github.com/)
-- [Vercel](https://vercel.com/)
-- [Netlify](https://www.netlify.com/)
-
-You can host your site using one of these solutions or any of our other trusted providers. [Read more about our recommended and trusted hosts](https://medium.com/frontend-mentor/frontend-mentor-trusted-hosting-providers-bf000dfebe).
-
-## Create a custom `README.md`
-
-We strongly recommend overwriting this `README.md` with a custom one. We've provided a template inside the [`README-template.md`](./README-template.md) file in this starter code.
-
-The template provides a guide for what to add. A custom `README` will help you explain your project and reflect on your learnings. Please feel free to edit our template as much as you like.
-
-Once you've added your information to the template, delete this file and rename the `README-template.md` file to `README.md`. That will make it show up as your repository's README file.
-
-## Submitting your solution
-
-Submit your solution on the platform for the rest of the community to see. Follow our ["Complete guide to submitting solutions"](https://medium.com/frontend-mentor/a-complete-guide-to-submitting-solutions-on-frontend-mentor-ac6384162248) for tips on how to do this.
-
-Remember, if you're looking for feedback on your solution, be sure to ask questions when submitting it. The more specific and detailed you are with your questions, the higher the chance you'll get valuable feedback from the community.
-
-## Sharing your solution
-
-There are multiple places you can share your solution:
-
-1. Share your solution page in the **#finished-projects** channel of the [community](https://www.frontendmentor.io/community).
-2. Tweet [@frontendmentor](https://twitter.com/frontendmentor) and mention **@frontendmentor**, including the repo and live URLs in the tweet. We'd love to take a look at what you've built and help share it around.
-3. Share your solution on other social channels like LinkedIn.
-4. Blog about your experience building your project. Writing about your workflow, technical choices, and talking through your code is a brilliant way to reinforce what you've learned. Great platforms to write on are [dev.to](https://dev.to/), [Hashnode](https://hashnode.com/), and [CodeNewbie](https://community.codenewbie.org/).
-
-We provide templates to help you share your solution once you've submitted it on the platform. Please do edit them and include specific questions when you're looking for feedback.
-
-The more specific you are with your questions the more likely it is that another member of the community will give you feedback.
-
-## Got feedback for us?
-
-We love receiving feedback! We're always looking to improve our challenges and our platform. So if you have anything you'd like to mention, please email hi@frontendmentor.io.
-
-This challenge is completely free. Please share it with anyone who will find it useful for practice.
-
-**Have fun building!** 🚀
+- Website - [Kisu Seo](https://github.com/kisu-seo)
+- Frontend Mentor - [@kisu-seo](https://www.frontendmentor.io/profile/kisu-seo)
